@@ -1,0 +1,68 @@
+version: '3.7'
+
+networks:
+    wishywish-net:
+      driver: bridge
+
+services:
+  # frontend:
+  #   image: frontend:latest
+  #   depends_on:
+  #      - "wishywish"
+  #   build:
+  #     context: .
+  #     dockerfile: frontend/Dockerfile
+  #   ports:
+  #     - "3000:3000"
+  #   networks:
+  #     - wishywish-net
+  # wishywish:
+  #   image: wishywish:latest
+  #   depends_on:
+  #      - "postgres"
+  #   build:
+  #     context: .
+  #     dockerfile: backend/Dockerfile
+  #   ports:
+  #     - "8080:80"
+  #   environment:
+  #     DB_CONNECTION_STRING: "host=localhost;port=5432;database=wishywish-db;username=super-user;password=super-pswd"
+  #   networks:
+  #     - wishywish-net
+  postgres:
+    image: postgres:alpine
+    ports:
+      - "5432:5432"
+    restart: always
+    volumes:
+      - ./backend/db/volume:/var/lib/postgresql/data
+      # - backend/db/volume:/var/lib/postgresql/data
+      # - ./Wishywish.Repository/dbscript/seed.sql :/docker-entrypoint-initdb.d/seed.sql
+    environment:
+      POSTGRES_USER: "super-user"
+      POSTGRES_PASSWORD: "super-pswd"
+      POSTGRES_DB: "wishywish-db"
+    networks:
+      - wishywish-net
+
+  pgadmin:
+    image: dpage/pgadmin4
+    depends_on:
+      - postgres
+    ports:
+      - "5555:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: pgadmin4@pgadmin.org
+      PGADMIN_DEFAULT_PASSWORD: admin
+    restart: unless-stopped
+    networks:
+      - wishywish-net
+# volumes:
+#   db_volume:
+#   #  external:
+#   #      name: backend/db/volum
+#      driver: local
+#      driver_opts:
+#       o: bind
+#       type: none
+#       device: ./backend/db/volume
